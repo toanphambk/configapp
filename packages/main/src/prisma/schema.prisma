@@ -1,0 +1,142 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String
+  devices     Device[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Device {
+  id           Int          @id @default(autoincrement())
+  projectId    Int
+  Project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  description  String
+  name         String       @unique
+  deviceTypeId Int
+  deviceType   DeviceType   @relation(fields: [deviceTypeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  port         DevicePort[]
+  mqtt         Mqtt?
+}
+
+model DeviceType {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  description String
+  model       String           @unique
+  image       Bytes?
+  portInfo    DevicePortInfo[]
+  device      Device[]
+}
+
+model DevicePortInfo {
+  id           Int        @id @default(autoincrement())
+  deviceType   DeviceType @relation(fields: [deviceTypeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  image        Bytes?
+  deviceTypeId Int
+  portName     String
+  portType     Int
+  description  String
+}
+
+model DevicePort {
+  id          Int          @id @default(autoincrement())
+  device      Device       @relation(fields: [deviceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  deviceId    Int
+  portName    String
+  description String
+  portType    Int
+  portSetting PortSetting?
+  protocol    Protocol[]
+}
+
+model Protocol {
+  id           Int           @id @default(autoincrement())
+  devicePort   DevicePort    @relation(fields: [devicePortId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  devicePortId Int
+  type         Int
+  tcpPort      Int?
+  slaveDevice  SlaveDevice[]
+}
+
+model SlaveDevice {
+  id            Int      @id @default(autoincrement())
+  Protocol      Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  protocolId    Int
+  name          String
+  deviceAddress String
+  description   String?
+  plcModel      Int?
+  scanRate      Int
+  IO            IO[]
+}
+
+model PortSetting {
+  id             Int        @id @default(autoincrement())
+  devicePort     DevicePort @relation(fields: [devicePortId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  devicePortId   Int        @unique
+  ipAddress      String?
+  subnetMask     String?
+  defaultGateway String?
+  baudRate       Int?
+  dataBits       Int?
+  stopBits       Int?
+  parity         Int?
+  flowControl    Int?
+}
+
+model IO {
+  id            Int           @id @default(autoincrement())
+  Name          String
+  slaveDeviceId Int
+  SlaveDevice   SlaveDevice   @relation(fields: [slaveDeviceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  description   String
+  register      Int?
+  startAddress  Int
+  length        Int
+  conversion    Int
+  MqttPayload   MqttPayload[]
+}
+
+model Mqtt {
+  id            Int         @id @default(autoincrement())
+  deviceId      Int         @unique
+  deviceConfig  Device      @relation(fields: [deviceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  brokerAddress String?
+  port          Int?
+  clientId      String?
+  username      String?
+  password      String?
+  keepAlive     Int?
+  cleanSession  Boolean?
+  useSSL        Boolean?
+  topics        MqttTopic[]
+}
+
+model MqttTopic {
+  id              Int           @id @default(autoincrement())
+  mqttId          Int
+  mqtt            Mqtt          @relation(fields: [mqttId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  topic           String
+  publishInterval Int
+  payload         MqttPayload[]
+}
+
+model MqttPayload {
+  id          Int       @id @default(autoincrement())
+  mqttTopicId Int
+  mqttTopic   MqttTopic @relation(fields: [mqttTopicId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  IOId        Int
+  IO          IO        @relation(fields: [IOId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  key         String
+  type        String
+}

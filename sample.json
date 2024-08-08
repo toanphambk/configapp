@@ -1,0 +1,81 @@
+{
+  "name": "Project A",
+  "description": "This is a sample project",
+  "devices": [
+    {
+      "name": "Device 1",
+      "configs": {
+        "name": "DeviceConfig 1",
+        "description": "Configuration for Device 1",
+        "port": [
+          {
+            "portName": "ethernet 2",
+            "portSetting": {
+              "portType": 12,
+              "ipAddress": "192.168.0.1",
+              "subnetMask": "255.255.255.0",
+              "defaultGateway": "192.168.0.254"
+            },
+            "protocol": [
+              {
+                "type": 11,
+                "ethernetPort": 8080,
+                "slaveDevice": [
+                  {
+                    "name": "Slave Device 1",
+                    "deviceAddress": "Address 1",
+                    "description": "Description for Slave Device 1",
+                    "plcModel": 1,
+                    "scanRate": 1000,
+                    "IO": [
+                      {
+                        "name": "IO 1",
+                        "description": "Description for IO 1",
+                        "register": "Register 1",
+                        "startAddress": 100,
+                        "length": 2,
+                        "conversion": 1,
+                        "MqttPayload": [
+                          {
+                            "key": "PayloadKey1",
+                            "type": "String"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "mqtt": {
+          "mqttConfig": {
+            "brokerAddress": "broker.example.com",
+            "port": 1883,
+            "clientId": "client123",
+            "username": "user",
+            "password": "password",
+            "keepAlive": 60,
+            "cleanSession": true,
+            "useSSL": false
+          },
+          "topics": [
+            {
+              "topic": "topic/1",
+              "publishInterval": 10,
+              "payload": [
+                {
+                  "key": "PayloadKey1",
+                  "type": "String",
+                  "device": "Slave Device 1",
+                  "ioName": "IO 1"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
